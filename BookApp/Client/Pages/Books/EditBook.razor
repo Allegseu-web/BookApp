@@ -1,0 +1,70 @@
+﻿@page "/editBook"
+@page "/editBook/{ID:int}"
+
+@inject HttpClient http
+@inject NavigationManager nav
+@inject IToastService toast
+
+<h3>AddBook</h3>
+
+<EditForm Model="Books" >
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <div class="card">
+        <div class="card-header">
+
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>Title</label>
+                <InputText class="form-control" @bind-Value="Books.Title"></InputText>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <InputText class="form-control" @bind-Value="Books.Description"></InputText>
+            </div>
+            <div class="form-group">
+                <label>Excerpt</label>
+                <InputText class="form-control" @bind-Value="Books.Excerpt"></InputText>
+            </div>
+            <div class="form-group">
+                <label>Page Count</label>
+                <InputNumber class="form-control" @bind-Value="Books.PageCount"></InputNumber>
+            </div>
+            <div class="form-group">
+                <label></label>
+                <InputDate class="form-control" @bind-Value="Books.PublishDate"></InputDate>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-success" @onclick="Modificar">Update</button>
+        </div>
+    </div>
+
+</EditForm>
+@code {
+    public Books Books { get; set; } = new Books();
+    [Parameter]
+    public int ID { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Books = await http.GetFromJsonAsync<Books>($"Books/{ID}");
+    }
+    public void Nuevo()
+    {
+        Books = new Books();
+    }
+    public void Buscar()
+    {
+
+    }
+    public async void Modificar()
+    {
+        var response = await http.PutAsJsonAsync("Books",Books);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            nav.NavigateTo("BookList", true);
+        }
+    }
+}

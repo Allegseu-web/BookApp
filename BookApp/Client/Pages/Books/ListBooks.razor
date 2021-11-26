@@ -1,0 +1,79 @@
+﻿@page "/BookList"
+
+@inject HttpClient Http
+@inject IToastService toast
+@inject NavigationManager nav
+<h3>Book List</h3>
+@if (books == null)
+{
+    <h3>Cargando</h3>
+}
+else
+{
+    <div class="card">
+        <div class="card-header d-flex justify-content-md-end">
+            <div class="d-flex align-items-center mb-3 mb-md-0 me-md-auto">
+                <h4 class="m-2">New Book?</h4>
+                <a href="addbook" class="btn btn-outline-success">Add</a>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Page Count</th>
+                    <th>Excerpt</th>
+                    <th>Publish Date</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                    </thead>
+                <tbody>
+                    @foreach (var item in books)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Title</td>
+                            <td>@item.Description</td>
+                            <td>@item.PageCount</td>
+                            <td>@item.Excerpt</td>
+                            <td>@item.PublishDate</td>
+                            <td><a class="btn btn-outline-secondary" href="@($"EditBook/{item.Id}")">Edit</a></td>
+                            <td><button class="btn btn-danger" @onclick="() => DeleteBookData(item.Id)">Delete</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+@code {
+    List<Books> books { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBookData();
+
+    }
+    async Task LoadBookData()
+    {
+        books = await Http.GetFromJsonAsync<List<Books>>("Books");
+    }
+    async Task DeleteBookData(int ID)
+    {
+        var response = await Http.DeleteAsync($"Books/{ID}");
+
+        if(response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            toast.ShowSuccess("Eliminado Exitosamente");
+            books = await Http.GetFromJsonAsync<List<Books>>("Books");
+        }
+    }
+
+
+
+}
